@@ -156,21 +156,58 @@ public class FieldPlayer extends Player {
       if (ballDist < 0.3) {
 
       LinkedList <Boolean> teammatePosition = new LinkedList<Boolean>(); //left = true and right is false
+      LinkedList <Boolean> opponentPosition = new LinkedList<Boolean>(); //left = true and right is false
       LinkedList<Double> teammateDir;
       LinkedList<Double> teammateDist;
       LinkedList<Double> opponentDist;
-
+      int robotFound=0;
+      int lastSavedTeammate=-1;
+      int lastSavedOpponent=-1;
       if(true){ // for testing search for teammate but then i have to search periodicly
-        for(int j=0; i<7; i++){
-          System.out.println("searching for teammate");
-          if(camera.searchTeammate()){
-            if(i<3) {
-              teammatePosition.addLast(true);
-              System.out.println("teammate was found on the left");
+
+        for(int j=0; j<7; j++){
+          System.out.println("searching for teammate "+j);
+          //robotFound 0 -> no opponent and no teammate was found
+          //robotFound 1 -> no opponent was found  and  teammate was found
+          //robotFound 2 -> opponent was found and no teammate was found
+          //robotFound 3 ->  opponent and  teammate was found
+
+          robotFound=camera.searchTeammate();
+          if(robotFound!=0){  
+            if(j<3) {
+              if(robotFound==1 && lastSavedTeammate!=j-1){
+                lastSavedTeammate=j;
+                teammatePosition.addLast(true);
+                System.out.println("teammate was found on the left");
+              }else if(robotFound==2 && lastSavedOpponent!=j-1){
+                lastSavedOpponent=j;
+                opponentPosition.addLast(true);
+                System.out.println("opponent was found on the left");
+              }else if(robotFound==3 && (lastSavedOpponent!=j-1 || lastSavedTeammate != 1)){
+                lastSavedOpponent=j;
+                lastSavedTeammate=j;
+                opponentPosition.addLast(true);
+                teammatePosition.addLast(true);
+                System.out.println("opponent and teammate was found on the left");
+              }
+
             }
-            else if(i>4) {
-              System.out.println("teammate was found on the right");
-              teammatePosition.addLast(false);
+            else if(j>4) {
+              if(robotFound==1 && lastSavedTeammate!=j-1){
+                lastSavedTeammate=j;
+                teammatePosition.addLast(false);
+                System.out.println("teammate was found on the right");
+              }else if(robotFound==2 && lastSavedOpponent!=j-1){
+                lastSavedOpponent=j;
+                opponentPosition.addLast(false);
+                System.out.println("opponent was found on the right");
+              }else if(robotFound==3 && (lastSavedOpponent!=j-1 || lastSavedTeammate != 1)){
+                lastSavedOpponent=j;
+                lastSavedTeammate=j;
+                opponentPosition.addLast(false);
+                teammatePosition.addLast(false);
+                System.out.println("opponent and teammate was found on the right");
+              }
             }
           } 
           
@@ -186,7 +223,7 @@ public class FieldPlayer extends Player {
       if(teammateDir!=null && teammateDist!=null) {
         //current section testing
         //find the best tactic for the current state(pass or shoot)
-        LinkedList bestTeammate=bestTactic(teammateDir, teammatePosition, opponentDist);
+        LinkedList bestTeammate=bestTactic(teammateDir, teammatePosition, opponentDist, opponentPosition);
         double bestTeammateDir=(double) bestTeammate.getFirst(); //get the first element of the tuple
         boolean isTeammateLeft=(boolean) bestTeammate.getLast(); //get the second (last) element of the tuple
         if(isTeammateLeft) System.out.println("best teammate is on the left"); 
@@ -295,7 +332,7 @@ public class FieldPlayer extends Player {
 
   //returns a tuple with [direction of teammate, is he left or right from the ball handler]
   private LinkedList bestTactic(LinkedList<Double> teammates, LinkedList<Boolean> position,
-                               LinkedList<Double> opponents ){
+                               LinkedList<Double> opponents, LinkedList<Boolean> opPosition ){
     LinkedList retVal= new LinkedList();
     if(teammates.isEmpty()) return null;
 

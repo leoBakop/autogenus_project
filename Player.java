@@ -251,9 +251,7 @@ public abstract class Player extends Robot {
       return null;
     for(Double d : tmp){
       retVal.addLast(d- headYawPosition.getValue());
-      
-      System.out.println("teammate direction "+ (d- headYawPosition.getValue()));
-    }
+      }
     
     return retVal;
   }
@@ -279,7 +277,6 @@ public abstract class Player extends Robot {
       return null;
     for(Double d : tmp){
       retVal.addLast(d- headYawPosition.getValue());
-      System.out.println(d- headYawPosition.getValue());
     }
     
     return retVal;

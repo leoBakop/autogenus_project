@@ -120,37 +120,59 @@ public class NaoCam {
     }
 
     goalDirectionAngle = blobDirectionAngle;
-    //System.out.println("camera: goal: dir: " + goalDirectionAngle);
   }
 
-  //in black we set small threshold
-  public boolean searchTeammate(){
-    boolean retVal=false;
+  //retvals 0 -> no opponent and no teammate was found
+  //retvals 1 -> no opponent was found  and  teammate was found
+  //retvals 2 -> opponent was found and no teammate was found
+  //retvals 3 ->  opponent and  teammate was found
+
+  //blobDirectionAngle!=UNKNOWN && blobElevationAngle<UNKNOWN/2
+  //the above condition exists in order to avoid the long distances teammates and opponents
+  //in black we set small threshold 
+  public int searchTeammate(){
+
+
+    int retVal=0;
     selectTop();
-    //teammate search
-    if(isRed) findColorBlob(0,0,0, 20);
-    else findColorBlob(51, 57, 240, 30);  
-
-    if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
     
-    if(blobDirectionAngle!=UNKNOWN){
-      System.out.println("inside if");
-      tDirAngle.addLast( blobDirectionAngle);
-      tElevationAngle.addLast(blobElevationAngle);
-      retVal=true;
-    }
-
+    image = topCamera.getImage();
 
     //oponent detection
-    if(isRed)findColorBlob(40, 178, 220, 60);
-    else findColorBlob(0,0,0, 20);
-    if(blobDirectionAngle!=UNKNOWN){
+    if(isRed)findColorBlob(40, 178, 220, 60); //blue
+    else findColorBlob(0,0,0, 20); //black
+
+    System.out.println("opponent dir "+blobDirectionAngle);
+    System.out.println("opponent dist "+blobElevationAngle);
+    if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
       opDirAngle.addLast( blobDirectionAngle);
       opElevationAngle.addLast(blobElevationAngle);
+      retVal=2;
     }
-    if(!opDirAngle.isEmpty()){
-      if(opDirAngle.getLast()!=UNKNOWN) System.out.println("opponent found "+ opDirAngle.getLast());
+
+
+    
+    //teammate search
+    if(retVal==2){ //if  it has already been found an opponent reduce the sensitivity of black
+      if(isRed) findColorBlob(0,0,0, 5); //black
+      else findColorBlob(51, 57, 240, 30);  
+    }else{
+      if(isRed) findColorBlob(0,0,0, 40); //black
+      else findColorBlob(51, 57, 240, 30);  
     }
+    
+
+    if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
+
+    System.out.println("teammate dir "+blobDirectionAngle);
+    System.out.println("teammate dist "+blobElevationAngle);
+    if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
+      System.out.println("teammate was found inside search camera");
+      tDirAngle.addLast( blobDirectionAngle);
+      tElevationAngle.addLast(blobElevationAngle);
+      retVal++;
+    }
+    
     return retVal;
     
   }
