@@ -251,7 +251,8 @@ public abstract class Player extends Robot {
       return null;
     for(Double d : tmp){
       retVal.addLast(d- headYawPosition.getValue());
-      System.out.println(d- headYawPosition.getValue());
+      
+      System.out.println("teammate direction "+ (d- headYawPosition.getValue()));
     }
     
     return retVal;
@@ -259,7 +260,7 @@ public abstract class Player extends Robot {
 
   public LinkedList<Double> getTeammateDistance(){
     LinkedList<Double> retVal=new LinkedList<Double>();
-    LinkedList<Double> tmp=camera.getTeammateDirAngle();
+    LinkedList<Double> tmp=camera.getTeammateElevationAngle();
     if (tmp.isEmpty())
       return null;
 
@@ -270,6 +271,34 @@ public abstract class Player extends Robot {
     }
     return retVal;
   }
+
+  public LinkedList<Double> getOpponentDirection(){
+    LinkedList<Double> retVal=new LinkedList<Double>();
+    LinkedList<Double> tmp=camera.getOpponentDirAngle();
+    if (tmp.isEmpty())
+      return null;
+    for(Double d : tmp){
+      retVal.addLast(d- headYawPosition.getValue());
+      System.out.println(d- headYawPosition.getValue());
+    }
+    
+    return retVal;
+  }
+
+  public LinkedList<Double> getOpponentDistance(){
+    LinkedList<Double> retVal=new LinkedList<Double>();
+    LinkedList<Double> tmp=camera.getOpponentElevationAngle();
+    if (tmp.isEmpty())
+      return null;
+
+    double ballElev=0.00;
+    for(Double d:tmp){
+      ballElev = d - headPitchPosition.getValue() - camera.getOffsetAngle();
+      retVal.addLast((0.51 - 0.043) / Math.tan(-ballElev));
+    }
+    return retVal;
+  }
+
 
   // turn head towards ball if ball position is known
   protected void trackBall() {

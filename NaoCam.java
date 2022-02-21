@@ -29,8 +29,12 @@ public class NaoCam {
   private int[] image;
   private double blobDirectionAngle = UNKNOWN;
   private double blobElevationAngle = UNKNOWN;
-  private LinkedList<Double> tDirAngle;
+  private LinkedList<Double> tDirAngle; //teammate dir angle
   private LinkedList<Double> tElevationAngle;
+  private LinkedList<Double> opDirAngle; //opponent dir angle
+  private LinkedList<Double> opElevationAngle;
+
+
   private double ballDirectionAngle = UNKNOWN;
   private double ballElevationAngle = UNKNOWN;
   private double goalDirectionAngle = UNKNOWN;
@@ -44,6 +48,9 @@ public class NaoCam {
     
     tDirAngle=new LinkedList<Double>();
     tElevationAngle=new LinkedList<Double>();
+
+    opDirAngle=new LinkedList<Double>();
+    opElevationAngle=new LinkedList<Double>();
 
     this.timeStep = timeStep;
     goalColor = Goal.UNKNOWN_COLOR;
@@ -116,19 +123,35 @@ public class NaoCam {
     //System.out.println("camera: goal: dir: " + goalDirectionAngle);
   }
 
-
-  // i have to find a way to select top camera
+  //in black we set small threshold
   public boolean searchTeammate(){
-    //new code
-    //find teammate
+    boolean retVal=false;
     selectTop();
+    //teammate search
+    if(isRed) findColorBlob(0,0,0, 20);
+    else findColorBlob(51, 57, 240, 30);  
+
+    if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
     
-    if(isRed) findColorBlob(0,0,0, 60);
-    else findColorBlob(51, 57, 240, 60);  
-    
-    tDirAngle.addLast( blobDirectionAngle);
-    tElevationAngle.addLast(blobElevationAngle);
-    return ! tDirAngle.isEmpty();
+    if(blobDirectionAngle!=UNKNOWN){
+      System.out.println("inside if");
+      tDirAngle.addLast( blobDirectionAngle);
+      tElevationAngle.addLast(blobElevationAngle);
+      retVal=true;
+    }
+
+
+    //oponent detection
+    if(isRed)findColorBlob(40, 178, 220, 60);
+    else findColorBlob(0,0,0, 20);
+    if(blobDirectionAngle!=UNKNOWN){
+      opDirAngle.addLast( blobDirectionAngle);
+      opElevationAngle.addLast(blobElevationAngle);
+    }
+    if(!opDirAngle.isEmpty()){
+      if(opDirAngle.getLast()!=UNKNOWN) System.out.println("opponent found "+ opDirAngle.getLast());
+    }
+    return retVal;
     
   }
 
@@ -154,6 +177,12 @@ public class NaoCam {
   }
   public LinkedList<Double> getTeammateElevationAngle(){
     return tElevationAngle;
+  }
+  public LinkedList<Double> getOpponentDirAngle(){
+    return opDirAngle;
+  }
+  public LinkedList<Double> getOpponentElevationAngle(){
+    return opElevationAngle;
   }
   
   public void selectTop() {
