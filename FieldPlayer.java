@@ -147,139 +147,154 @@ public class FieldPlayer extends Player {
 
       double ballDir = getBallDirection();
       double ballDist = getBallDistance();
-
+      
       
 
 
       System.out.println("ball dist: " + ballDist + " ball dir: " + ballDir + " goal dir: " + goalDir);
 
+
       if (ballDist < 0.3) {
+      
+        camera.searchForGoal();
+        double goalDist =getGoalDistance();
 
-      LinkedList <Boolean> teammatePosition = new LinkedList<Boolean>(); //left = true and right is false
-      LinkedList <Boolean> opponentPosition = new LinkedList<Boolean>(); //left = true and right is false
-      LinkedList<Double> teammateDir;
-      LinkedList<Double> teammateDist;
-      LinkedList<Double> opponentDist;
-      int robotFound=0;
-      int lastSavedTeammate=-1;
-      int lastSavedOpponent=-1;
-      if(true){ // for testing search for teammate but then i have to search periodicly
+        LinkedList <Boolean> teammatePosition = new LinkedList<Boolean>(); //left = true and right is false
+        LinkedList <Boolean> opponentPosition = new LinkedList<Boolean>(); //left = true and right is false
+        LinkedList<Double> teammateDir;
+        LinkedList<Double> teammateDist;
+        LinkedList<Double> opponentDist;
 
-        for(int j=0; j<7; j++){
-          System.out.println("searching for teammate "+j);
-          //robotFound 0 -> no opponent and no teammate was found
-          //robotFound 1 -> no opponent was found  and  teammate was found
-          //robotFound 2 -> opponent was found and no teammate was found
-          //robotFound 3 ->  opponent and  teammate was found
+        int robotFound=0;
+        int lastSavedTeammate=-1;
+        int lastSavedOpponent=-1;
+        if(true){ // for testing search for teammate but then i have to search periodicly
 
-          robotFound=camera.searchTeammate();
-          if(robotFound!=0){  
-            if(j<3) {
-              if(robotFound==1 && lastSavedTeammate!=j-1){
-                lastSavedTeammate=j;
-                teammatePosition.addLast(true);
-                System.out.println("teammate was found on the left");
-              }else if(robotFound==2 && lastSavedOpponent!=j-1){
-                lastSavedOpponent=j;
-                opponentPosition.addLast(true);
-                System.out.println("opponent was found on the left");
-              }else if(robotFound==3 && (lastSavedOpponent!=j-1 || lastSavedTeammate != 1)){
-                lastSavedOpponent=j;
-                lastSavedTeammate=j;
-                opponentPosition.addLast(true);
-                teammatePosition.addLast(true);
-                System.out.println("opponent and teammate was found on the left");
+          for(int j=0; j<7; j++){
+
+            System.out.println("searching for teammate "+j);
+
+            System.out.println("goal distance is "+ goalDist);
+            //robotFound 0 -> no opponent and no teammate was found
+            //robotFound 1 -> no opponent was found  and  teammate was found
+            //robotFound 2 -> opponent was found and no teammate was found
+            //robotFound 3 ->  opponent and  teammate was found
+
+            robotFound=camera.searchTeammate();
+            if(robotFound!=0){
+              
+              if(j<3) {
+                if(robotFound==1 && lastSavedTeammate!=j-1){
+                  lastSavedTeammate=j;
+                  teammatePosition.addLast(true);
+                  System.out.println("teammate was found on the left");
+                }else if(robotFound==2 && lastSavedOpponent!=j-1){
+                  lastSavedOpponent=j;
+                  opponentPosition.addLast(true);
+                  System.out.println("opponent was found on the left");
+                }else if(robotFound==3 && (lastSavedOpponent!=j-1 || lastSavedTeammate != 1)){
+                  lastSavedOpponent=j;
+                  lastSavedTeammate=j;
+                  opponentPosition.addLast(true);
+                  teammatePosition.addLast(true);
+                  System.out.println("opponent and teammate was found on the left");
+                }
+
               }
-
-            }
-            else if(j>4) {
-              if(robotFound==1 && lastSavedTeammate!=j-1){
-                lastSavedTeammate=j;
-                teammatePosition.addLast(false);
-                System.out.println("teammate was found on the right");
-              }else if(robotFound==2 && lastSavedOpponent!=j-1){
-                lastSavedOpponent=j;
-                opponentPosition.addLast(false);
-                System.out.println("opponent was found on the right");
-              }else if(robotFound==3 && (lastSavedOpponent!=j-1 || lastSavedTeammate != 1)){
-                lastSavedOpponent=j;
-                lastSavedTeammate=j;
-                opponentPosition.addLast(false);
-                teammatePosition.addLast(false);
-                System.out.println("opponent and teammate was found on the right");
+              else if(j>4) {
+                if(robotFound==1 && lastSavedTeammate!=j-1){
+                  lastSavedTeammate=j;
+                  teammatePosition.addLast(false);
+                  System.out.println("teammate was found on the right");
+                }else if(robotFound==2 && lastSavedOpponent!=j-1){
+                  lastSavedOpponent=j;
+                  opponentPosition.addLast(false);
+                  System.out.println("opponent was found on the right");
+                }else if(robotFound==3 && (lastSavedOpponent!=j-1 || lastSavedTeammate != 1)){
+                  lastSavedOpponent=j;
+                  lastSavedTeammate=j;
+                  opponentPosition.addLast(false);
+                  teammatePosition.addLast(false);
+                  System.out.println("opponent and teammate was found on the right");
+                }
               }
-            }
-          } 
+            } 
+            
+            tTurnLeft60();
+            
+          }
+          teammateDir =getTeammateDirection();
+          teammateDist = getTeammateDistance();
+          opponentDist=getOpponentDistance();
+          camera.selectBottom();
+
+          // in the last iteration, robot detectes his shadow as a teammate so i have to remove it
+          if(Math.abs(teammateDist.getLast()-0.4788)<0.1 && Math.abs(teammateDir.getLast()+0.1344)<0.1){
+            teammateDir.removeLast();
+            teammateDist.removeLast();
+            System.out.println("shadow was removed successfully");
+          }
+        }
+
+        if(teammateDir!=null && teammateDist!=null) {
+          //current section testing
+          //find the best tactic for the current state(pass or shoot)
+          LinkedList bestTeammate=bestTactic(teammateDir, teammatePosition, opponentDist, opponentPosition);
+          double bestTeammateDir=(double) bestTeammate.getFirst(); //get the first element of the tuple
+          boolean isTeammateLeft=(boolean) bestTeammate.getLast(); //get the second (last) element of the tuple
+          if(isTeammateLeft) System.out.println("best teammate is on the left"); 
+          else System.out.println("best teammate is on the right");
+          //testing passing session
+          passing(isTeammateLeft, bestTeammateDir, ballDist, goalDist);
+          //end of current section testing
+        }else System.out.println("no teammate was found");
+
+
+
+          System.out.println("short distance");
+          shortDist=true;
+          if (ballDir < -0.15){    //sometimes there is a deadlock between 138 and 142 line
+            playMotion(sideStepLeftMotion);
+            System.out.println("lagou step left");
+          }
+          else if (ballDir > 0.15 && Math.random()<0.85){ // we enter this if with 75% propability
+            playMotion(sideStepRightMotion);
+          }
+          else if (goalDir < -0.35)
+            turnLeft40();
+          else if (goalDir > 0.35)
+            turnRight40();
+          else {
+            System.out.println("try to shoot");
+            playMotion(sideStepRightMotion);// my robot is a left footed player so in order to shoot the ball with the left foot
+            System.out.println("took a small right step");// it performs a right step
+            if(ballDist>0.17)
+              playMotion(forwardsMotion); //take a small forward step
+            System.out.println("shooting !!!");
+            playMotion(shooting);
+          }
+        }else {
+          shortDist=false;//new code
           
-          tTurnLeft60();
-          
+          double goDir = normalizeAngle(ballDir - goalDir);
+
+          if (goDir < ballDir - 0.5)
+            goDir = ballDir - 0.5;
+          else if (goDir > ballDir + 0.5)
+            goDir = ballDir + 0.5;
+
+          goDir = normalizeAngle(goDir);
+
+          turnBodyRel(goDir);
+          if (ballDist < 0.6)
+            playMotion(forwardsMotion);
+          else
+            playMotion(forwards50Motion);
         }
-        teammateDir =getTeammateDirection();
-        teammateDist = getTeammateDistance();
-        opponentDist=getOpponentDistance();
-        camera.selectBottom();
-      }
-
-      if(teammateDir!=null && teammateDist!=null) {
-        //current section testing
-        //find the best tactic for the current state(pass or shoot)
-        LinkedList bestTeammate=bestTactic(teammateDir, teammatePosition, opponentDist, opponentPosition);
-        double bestTeammateDir=(double) bestTeammate.getFirst(); //get the first element of the tuple
-        boolean isTeammateLeft=(boolean) bestTeammate.getLast(); //get the second (last) element of the tuple
-        if(isTeammateLeft) System.out.println("best teammate is on the left"); 
-        else System.out.println("best teammate is on the right");
-        //testing passing session
-        passing(isTeammateLeft, bestTeammateDir, ballDist);
-        //end of current section testing
-      }else System.out.println("no teammate was found");
-
-
-
-        System.out.println("short distance");
-        shortDist=true;
-        if (ballDir < -0.15){    //sometimes there is a deadlock between 138 and 142 line
-          playMotion(sideStepLeftMotion);
-          System.out.println("lagou step left");
-        }
-        else if (ballDir > 0.15 && Math.random()<0.85){ // we enter this if with 75% propability
-          playMotion(sideStepRightMotion);
-        }
-        else if (goalDir < -0.35)
-          turnLeft40();
-        else if (goalDir > 0.35)
-          turnRight40();
-        else {
-          System.out.println("try to shoot");
-          playMotion(sideStepRightMotion);// my robot is a left footed player so in order to shoot the ball with the left foot
-          System.out.println("took a small right step");// it performs a right step
-          if(ballDist>0.17)
-            playMotion(forwardsMotion); //take a small forward step
-          System.out.println("shooting !!!");
-          playMotion(shooting);
-        }
-      }
-      else {
-        shortDist=false;//new code
-        
-        double goDir = normalizeAngle(ballDir - goalDir);
-
-        if (goDir < ballDir - 0.5)
-          goDir = ballDir - 0.5;
-        else if (goDir > ballDir + 0.5)
-          goDir = ballDir + 0.5;
-
-        goDir = normalizeAngle(goDir);
-
-        turnBodyRel(goDir);
-        if (ballDist < 0.6)
-          playMotion(forwardsMotion);
-        else
-          playMotion(forwards50Motion);
-      }
     }
   }
 
-  private void passing(boolean isLeft, double dir, double ballDist){
+  private void passing(boolean isLeft, double dir, double ballDist, double goalDist){
     System.out.println("trying to pass");
    
     if(isLeft){//teammate is on the left
@@ -333,13 +348,34 @@ public class FieldPlayer extends Player {
   //returns a tuple with [direction of teammate, is he left or right from the ball handler]
   private LinkedList bestTactic(LinkedList<Double> teammates, LinkedList<Boolean> position,
                                LinkedList<Double> opponents, LinkedList<Boolean> opPosition ){
+
     LinkedList retVal= new LinkedList();
     if(teammates.isEmpty()) return null;
+    
+    LinkedList<Boolean> possibleBestTeammates=new LinkedList<Boolean>();
+
+
+    //check in order to pass
+    for(int i=0; i<teammates.size(); i++){
+      if(position.get(i)){//if the current teammate is on the left
+        for(int j=0; j<opponents.size(); j++){
+          if(opPosition.get(j)) possibleBestTeammates.add(i, (Boolean) false); //if teammate is also left then don't pass
+        }
+      }else{ //if the current teammate is on the right
+        for(int j=0; j<opponents.size(); j++){
+          if(!opPosition.get(j)) possibleBestTeammates.add(i, (Boolean) false); //if teammate is also left then don't pass
+        }
+      } 
+    }
+
+    
+
 
     retVal.addLast(teammates.getFirst());
     retVal.addLast(position.getFirst());
     
-
     return retVal;
   }
+
+
 }

@@ -39,6 +39,8 @@ public class NaoCam {
   private double ballElevationAngle = UNKNOWN;
   private double goalDirectionAngle = UNKNOWN;
 
+  private double goalElevationAngle=UNKNOWN;
+
   //new code
   private boolean isRed;
 
@@ -120,6 +122,28 @@ public class NaoCam {
     }
 
     goalDirectionAngle = blobDirectionAngle;
+    goalElevationAngle =blobElevationAngle;
+  }
+
+
+  public void searchForGoal(){
+    selectTop();
+    image = topCamera.getImage();
+    // find goal
+    switch (goalColor) {
+      case SKY_BLUE:
+        findColorBlob(30, 200, 200, 60);
+        break;
+      case YELLOW:
+        findColorBlob(140, 140, 15, 60);
+        break;
+      default:
+        goalDirectionAngle = UNKNOWN;
+      }
+
+    goalDirectionAngle = blobDirectionAngle;
+    goalElevationAngle =blobElevationAngle;
+    selectBottom();
   }
 
   //retvals 0 -> no opponent and no teammate was found
@@ -166,7 +190,11 @@ public class NaoCam {
 
     System.out.println("teammate dir "+blobDirectionAngle);
     System.out.println("teammate dist "+blobElevationAngle);
-    if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
+    boolean dist=false;
+    if(retVal==2)  dist= Math.abs(blobElevationAngle)>0.2;
+    else dist = Math.abs(blobElevationAngle)>0.4;
+
+    if(blobDirectionAngle!=UNKNOWN && dist){
       System.out.println("teammate was found inside search camera");
       tDirAngle.addLast( blobDirectionAngle);
       tElevationAngle.addLast(blobElevationAngle);
@@ -192,6 +220,10 @@ public class NaoCam {
 
   public double getGoalDirectionAngle() {
     return goalDirectionAngle;
+  }
+
+  public double getGoalElevationAngle(){
+    return goalElevationAngle;
   }
 
   public LinkedList<Double> getTeammateDirAngle(){
