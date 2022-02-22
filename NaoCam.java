@@ -168,6 +168,9 @@ public class NaoCam {
 
     System.out.println("opponent dir "+blobDirectionAngle);
     System.out.println("opponent dist "+blobElevationAngle);
+
+
+
     if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
       opDirAngle.addLast( blobDirectionAngle);
       opElevationAngle.addLast(blobElevationAngle);
@@ -190,6 +193,16 @@ public class NaoCam {
 
     System.out.println("teammate dir "+blobDirectionAngle);
     System.out.println("teammate dist "+blobElevationAngle);
+
+    if(Math.abs(blobDirectionAngle+0.12413)<0.001 && 
+          Math.abs(blobElevationAngle- 0.4896)<0.001){ //he migh saw his shadow
+            
+            System.out.println("inside nao cam if");
+            if(isRed) findColorBlob(102,13,13, 60); //red
+            else findColorBlob(51, 57, 240, 30);
+
+    }
+    
     boolean dist=false;
     if(retVal==2)  dist= Math.abs(blobElevationAngle)>0.2;
     else dist = Math.abs(blobElevationAngle)>0.4;
