@@ -166,9 +166,6 @@ public class NaoCam {
     if(isRed)findColorBlob(40, 178, 220, 60); //blue
     else findColorBlob(0,0,0, 20); //black
 
-    System.out.println("opponent dir "+blobDirectionAngle);
-    System.out.println("opponent dist "+blobElevationAngle);
-
 
 
     if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
@@ -191,13 +188,12 @@ public class NaoCam {
 
     if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
 
-    System.out.println("teammate dir "+blobDirectionAngle);
-    System.out.println("teammate dist "+blobElevationAngle);
+    
 
-    if(Math.abs(blobDirectionAngle+0.12413)<0.001 && 
-          Math.abs(blobElevationAngle- 0.4896)<0.001){ //he migh saw his shadow
+    if(Math.abs(blobDirectionAngle+0.12413)<0.1 && 
+          Math.abs(blobElevationAngle- 0.4896)<0.1){ //he migh saw his shadow
             
-            System.out.println("inside nao cam if");
+            System.out.println("check if he didn't saw a shadow");
             if(isRed) findColorBlob(102,13,13, 60); //red
             else findColorBlob(51, 57, 240, 30);
 
