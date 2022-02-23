@@ -156,7 +156,6 @@ public class NaoCam {
   //in black we set small threshold 
   public int searchTeammate(){
 
-
     int retVal=0;
     selectTop();
     
@@ -166,30 +165,25 @@ public class NaoCam {
     if(isRed)findColorBlob(40, 178, 220, 60); //blue
     else findColorBlob(0,0,0, 20); //black
 
-
-
     if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
       opDirAngle.addLast( blobDirectionAngle);
       opElevationAngle.addLast(blobElevationAngle);
       retVal=2;
     }
-
-
     
     //teammate search
     if(retVal==2){ //if  it has already been found an opponent reduce the sensitivity of black
       if(isRed) findColorBlob(0,0,0, 5); //black
       else findColorBlob(51, 57, 240, 30);  
     }else{
-      if(isRed) findColorBlob(0,0,0, 40); //black
+      if(isRed) findColorBlob(0,0,0, 15); //black
       else findColorBlob(51, 57, 240, 30);  
     }
     
 
     if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
 
-    
-
+  
     if(Math.abs(blobDirectionAngle+0.12413)<0.1 && 
           Math.abs(blobElevationAngle- 0.4896)<0.1){ //he migh saw his shadow
             
@@ -200,6 +194,7 @@ public class NaoCam {
     }
     
     boolean dist=false;
+    
     if(retVal==2)  dist= Math.abs(blobElevationAngle)>0.2;
     else dist = Math.abs(blobElevationAngle)>0.4;
 
@@ -210,6 +205,7 @@ public class NaoCam {
       retVal++;
     }
     
+    System.out.println("retval of nao cam "+ retVal);
     return retVal;
     
   }
