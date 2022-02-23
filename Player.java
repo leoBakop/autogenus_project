@@ -16,6 +16,9 @@ public abstract class Player extends Robot {
 
   public static final int SIMULATION_STEP = 40;  // milliseconds
   public static final int CAMERA_STEP = 160;  // camera refresh rate in milliseconds
+  protected final int STEPS = 60;
+  protected final int POSITIONS=4;
+  protected final int REGEIONS=STEPS/POSITIONS;
 
   protected RoboCupGameControlData gameControlData = new RoboCupGameControlData();
   protected int teamID;
@@ -189,7 +192,7 @@ public abstract class Player extends Robot {
   // move head from left to right and from right to left
   // until the ball is sighted or the scan motion is over
   protected void headScan() {
-    final int STEPS = 30;
+    int steps = 30;
     final double HEAD_YAW_MAX = 2.0;
     double yawAngle;
 
@@ -197,8 +200,8 @@ public abstract class Player extends Robot {
     camera.selectTop();  // use top camera
 
     // left to right using TOP camera
-    for (int i = 0; i < STEPS; i++) {
-      yawAngle = ((double)i / (STEPS - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+    for (int i = 0; i < steps; i++) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
       headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
       step(SIMULATION_STEP);
       camera.processImage();
@@ -209,8 +212,8 @@ public abstract class Player extends Robot {
     camera.selectBottom();  // use bottom camera
 
     // right to left using BOTTOM camera
-    for (int i = STEPS - 1; i >= 0; i--) {
-      yawAngle = ((double)i / (STEPS - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+    for (int i = steps - 1; i >= 0; i--) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
       headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
       step(SIMULATION_STEP);
       camera.processImage();
@@ -229,9 +232,7 @@ public abstract class Player extends Robot {
   //10 -> left right 3p/4
   //11 -> left left 4p/4
   protected void searchForPlayers(){
-    final int STEPS = 60;
-    final int POSITIONS=4;
-    final int REGEIONS=STEPS/POSITIONS;
+    
     final double HEAD_YAW_MAX = 2.0;
     double yawAngle;
 

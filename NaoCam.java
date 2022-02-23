@@ -165,7 +165,7 @@ public class NaoCam {
     
 
     //oponent detection
-    if(isRed)findColorBlob(40, 178, 220, 60); //blue
+    if(isRed)findColorBlob(40, 178, 220, 40); //blue
     else findColorBlob(0,0,0, 20); //black
 
     if(blobDirectionAngle!=UNKNOWN ){
@@ -199,14 +199,7 @@ public class NaoCam {
       tDirAngle.addLast(0.0);
       tElevationAngle.addLast(0.0);
     }
-    /* if(Math.abs(blobDirectionAngle+0.12413)<0.1 && 
-          Math.abs(blobElevationAngle- 0.4896)<0.1){ //he migh saw his shadow
-            
-            System.out.println("check if he didn't saw a shadow");
-            if(isRed) findColorBlob(102,13,13, 60); //red
-            else findColorBlob(51, 57, 240, 30);
-
-    } */
+    
     
     
     return retVal;
