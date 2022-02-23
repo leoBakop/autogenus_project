@@ -156,19 +156,26 @@ public class NaoCam {
   //in black we set small threshold 
   public int searchTeammate(){
 
+    if (topSelected)
+      image = topCamera.getImage();
+    else
+      image = bottomCamera.getImage();
+
     int retVal=0;
-    selectTop();
     
-    image = topCamera.getImage();
 
     //oponent detection
     if(isRed)findColorBlob(40, 178, 220, 60); //blue
     else findColorBlob(0,0,0, 20); //black
 
-    if(blobDirectionAngle!=UNKNOWN && Math.abs(blobElevationAngle)>0.2){
+    if(blobDirectionAngle!=UNKNOWN ){
+      System.out.println("opponent dir "+ blobDirectionAngle);
       opDirAngle.addLast( blobDirectionAngle);
       opElevationAngle.addLast(blobElevationAngle);
       retVal=2;
+    }else{
+      opDirAngle.addLast(0.0);
+      opElevationAngle.addLast(0.0);
     }
     
     //teammate search
@@ -182,30 +189,26 @@ public class NaoCam {
     
 
     if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
-
-  
-    if(Math.abs(blobDirectionAngle+0.12413)<0.1 && 
+   
+    if(blobDirectionAngle!=UNKNOWN){
+      retVal++;
+      tDirAngle.addLast(blobDirectionAngle);
+      tElevationAngle.addLast(blobElevationAngle);
+      System.out.println("teammate dir "+ blobDirectionAngle);
+    }else{
+      tDirAngle.addLast(0.0);
+      tElevationAngle.addLast(0.0);
+    }
+    /* if(Math.abs(blobDirectionAngle+0.12413)<0.1 && 
           Math.abs(blobElevationAngle- 0.4896)<0.1){ //he migh saw his shadow
             
             System.out.println("check if he didn't saw a shadow");
             if(isRed) findColorBlob(102,13,13, 60); //red
             else findColorBlob(51, 57, 240, 30);
 
-    }
+    } */
     
-    boolean dist=false;
     
-    if(retVal==2)  dist= Math.abs(blobElevationAngle)>0.2;
-    else dist = Math.abs(blobElevationAngle)>0.4;
-
-    if(blobDirectionAngle!=UNKNOWN && dist){
-      System.out.println("teammate was found inside search camera");
-      tDirAngle.addLast( blobDirectionAngle);
-      tElevationAngle.addLast(blobElevationAngle);
-      retVal++;
-    }
-    
-    System.out.println("retval of nao cam "+ retVal);
     return retVal;
     
   }
@@ -215,6 +218,8 @@ public class NaoCam {
   // a direction angle will not exceed +/- half the field of view
   // a positive direction is towards the right of the camera image
   // a positive elevation is towards the top of the camera image
+
+  //so negative means left
   public double getBallDirectionAngle() {
     return ballDirectionAngle;
   }

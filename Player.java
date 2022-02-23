@@ -222,6 +222,53 @@ public abstract class Player extends Robot {
     headYaw.setPosition(0.0);
   }
 
+
+  //positions
+  //00 -> right right 0
+  //01 ->right left p/4
+  //10 -> left right 3p/4
+  //11 -> left left 4p/4
+  protected void searchForPlayers(){
+    final int STEPS = 60;
+    final int POSITIONS=4;
+    final int REGEIONS=STEPS/POSITIONS;
+    final double HEAD_YAW_MAX = 2.0;
+    double yawAngle;
+
+    headPitch.setPosition(0.0);  // horizontal head
+    camera.selectTop();  // use top camera
+
+    // left to right using TOP camera
+    for (int i = 0; i < STEPS; i++) {
+      yawAngle = ((double)i / (STEPS - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+      headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
+      step(SIMULATION_STEP);
+      camera.searchTeammate();
+      if(i==0){
+        System.out.println("---------------------------");
+        System.out.println("00");
+      }else if(i==1*REGEIONS){
+        System.out.println("---------------------------");
+        System.out.println("01");
+      }else if(i==2*REGEIONS){
+        System.out.println("---------------------------");
+        System.out.println("10");
+      }else if(i==3*REGEIONS){
+        System.out.println("---------------------------");
+        System.out.println("11");
+      }
+    }
+
+    
+
+    
+    headYaw.setPosition(0.0);
+
+    
+
+
+  }
+
   public double getBallDirection() {
     if (camera.getBallDirectionAngle() == NaoCam.UNKNOWN)
       return NaoCam.UNKNOWN;
