@@ -93,6 +93,16 @@ public class NaoCam {
     }
   }
 
+  public void searchForBall(){
+    selectBottom();
+    image = bottomCamera.getImage();
+    // find orange ball
+    findColorBlob(240, 140, 50, 60);
+    ballDirectionAngle = blobDirectionAngle;
+    ballElevationAngle = blobElevationAngle;
+    return;
+  }
+
   // analyse image and find blobs
   public void processImage() {
 
@@ -105,9 +115,6 @@ public class NaoCam {
     findColorBlob(240, 140, 50, 60);
     ballDirectionAngle = blobDirectionAngle;
     ballElevationAngle = blobElevationAngle;
-
-    
-    
 
     // find goal
     switch (goalColor) {

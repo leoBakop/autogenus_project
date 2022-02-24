@@ -9,6 +9,7 @@
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 import com.cyberbotics.webots.controller.*;
 
@@ -261,80 +262,71 @@ public class FieldPlayer extends Player {
 
   //=========================================================================================
 
-
-  private void passing(int position, double dir){
-    camera.selectBottom();
-
-    switch(position){
+  
+  public void passing(int teammatePos, double teammateDir){
+    camera.searchForBall();
+    // -0.1< best ball direction for shooting<0.1 
+    
+    
+    playMotion(backwardsMotion);
+    switch(teammatePos){
       case 0: 
+        System.out.println("case 0");
         turnRight60();
         break;
+      case 1:
+      System.out.println("case 1");
+        turnRight40();
+        break;
+      case 2:
+        System.out.println("case 2");
+        turnLeft40();
+        break;
       case 3:
+        System.out.println("case 3");
         turnLeft60();
         break;
       default:
       //do nothung if the ball is in front of you
     }
-
-    dir=normalizeAngle(dir);
-    turnBodyRel(dir);
-    for(int i=0; i<4; i++){
-      playMotion(sideStepRightMotion);
-    }
+    //turnBodyRel(teammateDir);
+    System.out.println("behind the ball");
+    goingBehindTheBall();
     shoot();
-  }
 
-/*   private void passing(int isLeft, double dir, double ballDist, double goalDist){
-    System.out.println("trying to pass");
-   
-    if(isLeft==3){//teammate is on the left
-      System.out.println("teammate is on the left");
-      turnBodyRel(dir);
-      playMotion(backwardsMotion);
-      playMotion(backwardsMotion);
-      for(int i=0; i<5; i++){
-        playMotion(sideStepRightMotion);
-      }
+  } 
 
-      playMotion(forwardsMotion);
-      playMotion(sideStepRightMotion);
-      for(int j=0; j<3; j++)
-        playMotion(forwardsMotion);
-      
-      turnBodyRel(dir);
-      playMotion(shooting);
-    }else if(isLeft==0){ //teammate is on the right
-
-      System.out.println("teammate is on the right");
-      playMotion(sideStepLeftMotion);
-      playMotion(sideStepLeftMotion);
-      turnRight60();
-      playMotion(backwardsMotion);
-      playMotion(backwardsMotion);
-      for(int i=0; i<4; i++){
+  private void goingBehindTheBall(){
+    double oldBallDir = getBallDirection();
+    double oldBallDist =getBallDistance();
+    double a=0.5;
+    while(Math.abs(oldBallDir)>0.12 && Math.abs(oldBallDist)<0.5){
+      if(Math.random()<a) playMotion(sideStepRightMotion);
+      else playMotion(sideStepLeftMotion);
+      camera.searchForBall();
+      double newBallDir = getBallDirection();
+      System.out.println("a is "+a);
+      System.out.println("new bal direction is "+ newBallDir);
+      if(newBallDir==camera.UNKNOWN) break; //might means that the ball is on shadow
+      if(Math.abs(newBallDir)<=0.1) break;
+      if(oldBallDir> 0.0 && newBallDir > oldBallDir){ //it means that the robot is righter than the ideal
+        a+=0.1;
+      }else if(oldBallDir< 0.0 && newBallDir < oldBallDir){ ////it means that the robot is lefter than the ideal
+        a-=0.1;
+      }else if(oldBallDir< 0.0 && newBallDir >oldBallDir){ //it means that the robot must go right
+        a-=0.1;
+      }else if(oldBallDir> 0.0 && newBallDir <oldBallDir){ //it means that the robot must go left
+        a+=0.1;
+      }else { //do sth random
         playMotion(sideStepLeftMotion);
       }
-      playMotion(forwardsMotion);
-      playMotion(sideStepRightMotion);
-      System.out.println("outside right if");
-      
-      turnBodyRel(-dir);
-      if(Math.abs(dir)<0.3){
-        playMotion(forwardsMotion);
-        playMotion(sideStepRightMotion);
-      }else if(Math.abs(dir)>0.3){
-        playMotion(sideStepLeftMotion);  
-      }
-      else if(Math.abs(dir)>0.45){
-        playMotion(sideStepLeftMotion);
-        playMotion(sideStepLeftMotion);
-      }
-
-      playMotion(shooting);
-
     }
-  } */
 
+    while(getBallDistance()>0.17){
+      playMotion(forwardsMotion);
+      camera.searchForBall();
+    }
+  }
   //returns a tuple with [direction of teammate, is he left or right from the ball handler]
   private LinkedList bestTactic(LinkedList<Double> teammates, LinkedList<Double> opponents,
                                 LinkedList<Double> teammatesDist, LinkedList<Double> opponentsDist,
@@ -374,7 +366,7 @@ public class FieldPlayer extends Player {
     if(teammateCounter>LIMIT) isTeammate=true;
     if(isTeammate && !isOpponent) {
       System.out.println("1");
-      retVal.addFirst(teammates.get(3*super.REGEIONS/2));
+      retVal.addFirst(teammates.get(3*super.REGEIONS));
       retVal.addLast(1);
       return retVal;
     }
