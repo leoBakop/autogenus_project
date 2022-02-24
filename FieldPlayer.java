@@ -196,6 +196,7 @@ public class FieldPlayer extends Player {
           if(bestTeammatePos==-2.0){
             System.out.println("walking with the ball");
             playMotion(forwardsMotion); //walk with the ball
+            playMotion(forwardsMotion); //walk with the ball
           }else{
             System.out.println("best teamate in on the "+bestTeammatePos);
             int integerBestPos=(int)Math.floor(bestTeammatePos);
