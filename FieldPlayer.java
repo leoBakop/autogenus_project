@@ -192,11 +192,12 @@ public class FieldPlayer extends Player {
           double bestTeammatePos=bestTactic(teammateDir, opponentsDir,
                                               teammateDist,opponentDist, goalDist);
           
-          
+          System.out.println("best tactic return "+ bestTeammatePos);
           if(bestTeammatePos==-2.0){
+            System.out.println("walking with the ball");
             playMotion(forwardsMotion); //walk with the ball
           }else{
-            System.out.println("best timate in on the "+bestTeammatePos);
+            System.out.println("best teamate in on the "+bestTeammatePos);
             int integerBestPos=(int)Math.floor(bestTeammatePos);
             if(integerBestPos==0) integerBestPos=1;
             //testing passing session
@@ -311,8 +312,7 @@ public class FieldPlayer extends Player {
         playMotion(sideStepLeftMotion);
       }
     }
-    if (getBallDirection()==camera.UNKNOWN) playMotion(forwardsMotion);
-    else{
+    if (getBallDirection()!=camera.UNKNOWN){
       while(getBallDistance()>0.17){
         playMotion(forwardsMotion);
         camera.searchForBall();
@@ -324,6 +324,8 @@ public class FieldPlayer extends Player {
       playMotion(sideStepRightMotion);
       System.out.println("take a small right step");
     }
+
+    return;
   }
   //returns -2 in case of errr
   //-1 in vase of straight shoot
@@ -407,9 +409,13 @@ public class FieldPlayer extends Player {
           middleIndex=i-1;
       }
     }
-    System.out.println("best teammate ret val "+(middleIndex+(maxIndex-middleIndex)/2));
-    if(max>LIMIT) return middleIndex+ (maxIndex-middleIndex)/2;
-    else return -2.0;
+    System.out.println("maximum is "+max);
+    System.out.println("best teammate ret val "+(double)(middleIndex+(maxIndex-middleIndex)/2));
+    if(max>LIMIT){ 
+      if(middleIndex+1==maxIndex)
+        return (double) middleIndex+ (maxIndex-middleIndex)/2;
+      return maxIndex;
+    }else return -2.0;
   }
 
   public void shoot(){
