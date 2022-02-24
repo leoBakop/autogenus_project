@@ -183,12 +183,12 @@ public class NaoCam {
       if(isRed) findColorBlob(0,0,0, 5); //black
       else findColorBlob(51, 57, 240, 30);  
     }else{
-      if(isRed) findColorBlob(0,0,0, 15); //black
+      if(isRed) findColorBlob(0,0,0, 50); //black also 60
       else findColorBlob(51, 57, 240, 30);  
     }
     
 
-    if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 60); //if my teammate is not black, try red
+    if(blobDirectionAngle==UNKNOWN) findColorBlob(102,13,13, 80); //if my teammate is not black, try red
    
     if(blobDirectionAngle!=UNKNOWN){
       retVal++;

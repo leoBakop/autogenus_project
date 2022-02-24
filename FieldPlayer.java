@@ -315,7 +315,7 @@ public class FieldPlayer extends Player {
 
     System.out.println("inside best tactic");
     LinkedList retVal= new LinkedList();
-    if(teammates.isEmpty()) return null;
+    if(teammates.isEmpty()) {System.out.println("-1"); return null; }
     
     
 
@@ -340,6 +340,7 @@ public class FieldPlayer extends Player {
       if(opponents.get(i)!=0.0 && Math.abs(opponentsDist.get(i))<11) isOpponent=true;
     }
     if(isTeammate && !isOpponent) {
+      System.out.println("1");
       retVal.addFirst(teammates.get(super.REGEIONS));
       retVal.addLast(1);
       return retVal;
@@ -350,6 +351,7 @@ public class FieldPlayer extends Player {
       if(opponents.get(i)!=0.0 && Math.abs(opponentsDist.get(i))<11) isOpponent=true;
     }
     if(isTeammate && !isOpponent) {
+      System.out.println("2");
       retVal.addFirst(teammates.get(3*super.REGEIONS/2));
       retVal.addLast(2);
       return retVal;
@@ -357,10 +359,12 @@ public class FieldPlayer extends Player {
 
 
     for(int i=0; i<super.REGEIONS; i++){
-      if(teammates.get(i)!=0.0 && Math.abs(teammatesDist.get(i))<11) isTeammate=true;
-      if(opponents.get(i)!=0.0 && Math.abs(opponentsDist.get(i))<11) isOpponent=true;
+      
+      if(teammates.get(i)!=0.0 && Math.abs(teammatesDist.get(i))<20) isTeammate=true;
+      if(opponents.get(i)!=0.0 && Math.abs(opponentsDist.get(i))<20) isOpponent=true;
     }
     if(isTeammate && !isOpponent) {
+      System.out.println("3");
       retVal.addFirst(teammates.get(super.REGEIONS/2));
       retVal.addLast(0);
       return retVal;
@@ -368,10 +372,12 @@ public class FieldPlayer extends Player {
     
    
     for(int i=3*super.REGEIONS; i<4*super.REGEIONS; i++){
-      if(teammates.get(i)!=0.0 && Math.abs(teammatesDist.get(i))<11) isTeammate=true;
-      if(opponents.get(i)!=0.0 && Math.abs(opponentsDist.get(i))<11) isOpponent=true;
+      
+      if(teammates.get(i)!=0.0 && Math.abs(teammatesDist.get(i))<20) isTeammate=true;
+      if(opponents.get(i)!=0.0 && Math.abs(opponentsDist.get(i))<20) isOpponent=true;
     }
     if(isTeammate && !isOpponent) {
+      System.out.println("4");
       retVal.addFirst(teammates.get(2*super.REGEIONS));
       retVal.addLast(3);
       return retVal;
