@@ -134,6 +134,7 @@ public class NaoCam {
 
 
   public void searchForGoal(){
+    System.out.println("inside search for goal");
     selectTop();
     image = topCamera.getImage();
     // find goal
@@ -150,7 +151,7 @@ public class NaoCam {
 
     goalDirectionAngle = blobDirectionAngle;
     goalElevationAngle =blobElevationAngle;
-    selectBottom();
+    
   }
 
   //retvals 0 -> no opponent and no teammate was found

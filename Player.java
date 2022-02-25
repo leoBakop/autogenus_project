@@ -27,7 +27,7 @@ public abstract class Player extends Robot {
   protected int playerID;
   private Motion standUpFromFrontMotion;
 
-  private int inMessage;
+  private byte inMessage;
   // devices
   protected Motor headYaw, headPitch;
   protected PositionSensor headYawPosition, headPitchPosition;
@@ -63,7 +63,7 @@ public abstract class Player extends Robot {
   public Player(int playerID, int teamID) {
     this.playerID = playerID;
     this.teamID = teamID;
-
+    this.inMessage=-2;
     // initialize accelerometer
     accelerometer = getAccelerometer("accelerometer");
     //accelerometer.enable(SIMULATION_STEP);  // uncomment only if needed !
@@ -429,7 +429,7 @@ public abstract class Player extends Robot {
   }
 
   protected void readIncomingMessages() {
-   
+    
     while (receiver.getQueueLength() > 0) {
       
       byte[] data = receiver.getData();
@@ -438,7 +438,9 @@ public abstract class Player extends Robot {
         gameControlData.update(data);
         //System.out.println(gameControlData);
         updateGameControl();
-        inMessage = ByteBuffer.wrap(data).getInt();
+       
+        inMessage=data[4];
+        
         updateGameControl();
       }
       // else
@@ -477,13 +479,20 @@ public abstract class Player extends Robot {
   //leo's communication
   
 
-  public int getIncomingMessage(){
+  public byte getIncomingMessage(){
     return inMessage;
 }
 
-  //request can be attatck, defense, pass
-  public void sendPlanMesagges(int request){
-    emitter.send(ByteBuffer.allocate(4).putInt(request).array());
+  //request can be error==-1 attatck ==0, pass==1, defence==2
+  public void sendPlanMesagges(){
+    byte[] header=createHeader();
+    emitter.send(header);
+    
+  }
+
+  public byte[] createHeader(){
+    byte[] header={82,71,109,101,00};
+    return header;
   }
 
 //---------------------------------------------------

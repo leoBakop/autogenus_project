@@ -349,6 +349,7 @@ public class FieldPlayer extends Player {
 
       while (getBallDirection() == NaoCam.UNKNOWN) {
         
+        
         if(i%3==0){//if you have already searched for the ball three times, take a step back.
           playMotion(backwardsMotion);
           playMotion(backwardsMotion);
@@ -374,10 +375,9 @@ public class FieldPlayer extends Player {
         }
         
       }
-
       double ballDir = getBallDirection();
       double ballDist = getBallDistance();
-      sendPlanMesagges(1);
+      //sendPlanMesagges();
       
 
 
@@ -386,9 +386,10 @@ public class FieldPlayer extends Player {
 
       if (ballDist < 0.3) {
         
-        
+        sameDirWithGoal();
         camera.searchForGoal();
         double goalDist =getGoalDistance();
+        System.out.println("goal dist is "+ goalDist);
 
         LinkedList <Boolean> teammatePosition = new LinkedList<Boolean>(); //left = true and right is false
         LinkedList <Boolean> opponentPosition = new LinkedList<Boolean>(); //left = true and right is false
@@ -418,7 +419,9 @@ public class FieldPlayer extends Player {
           System.out.println("best tactic return "+ bestTeammatePos);
           if(bestTeammatePos==-2.0){
             System.out.println("walking with the ball");
+            sameDirWithGoal();
             walkWithTheBall();
+            //sendPlanMesagges();
           }else{
             System.out.println("best teamate in on the "+bestTeammatePos);
             int integerBestPos=(int)Math.floor(bestTeammatePos);
@@ -476,23 +479,56 @@ public class FieldPlayer extends Player {
     while(true){
       runStep();
       getUpIfNecessary();
-      int tactic= getIncomingMessage();
+      byte tactic= getIncomingMessage();
       
-        System.out.println("the given tactic is"+tactic);
       while(tactic==0){
-        System.out.println("now i am attacking");
-        playMotion(forwardsMotion);
+        playMotion(forwards50Motion);
+        tactic=getIncomingMessage();
+      }
+
+      while(tactic==1){
+        System.out.println("stay");
+        tactic=getIncomingMessage();
       }
     } 
   }
 
   public void walkWithTheBall(){
-    for(int i=0; i<2; i++){
+    int steps=30;
+    final double HEAD_YAW_MAX = 2.0;
+    double yawAngle;
+    for(int i=0; i<5; i++){
       playMotion(forwardsMotion);
     }
-    //i have to keep straight the 
-    //bottom camera somehow
-   
+    //in case to find the ball easily
+    camera.selectBottom();
+    for (int i = steps - 1; i >= 0; i--) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+      headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
+      step(SIMULATION_STEP);
+    }
   }
 
+  public void sameDirWithGoal(){
+    System.out.println("inside same dir");
+    camera.searchForGoal();
+    double goalDir=getGoalDirection();
+    while(Math.abs(goalDir)>0.2){
+      System.out.println(goalDir);
+      if(goalDir==camera.UNKNOWN){
+        for(int i=0; i<2; i++){
+          turnLeft40();
+        }
+      }
+      if(goalDir<-0.6) turnLeft60();
+      if(goalDir<-0.35) turnLeft40();
+      if(goalDir >0.6) turnRight60();
+      if(goalDir>0.35)  turnRight40();
+      
+      camera.searchForGoal();
+      goalDir=getGoalDirection();
+    }
+
+    return;
+  }
 }
