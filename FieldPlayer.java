@@ -113,6 +113,7 @@ public class FieldPlayer extends Player {
   }
 
   @Override public void run() {
+
     
     step(SIMULATION_STEP);
 
@@ -159,10 +160,10 @@ public class FieldPlayer extends Player {
 
 
       System.out.println("ball dist: " + ballDist + " ball dir: " + ballDir + " goal dir: " + goalDir);
-
+      
 
       if (ballDist < 0.3) {
-      
+        
         
         camera.searchForGoal();
         double goalDist =getGoalDistance();

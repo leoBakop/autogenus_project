@@ -344,6 +344,13 @@ public abstract class Player extends Robot {
     return retVal;
   }
 
+  public double getGoalDirection(){
+    if (camera.getBallDirectionAngle() == NaoCam.UNKNOWN)
+      return NaoCam.UNKNOWN;
+    else
+      return camera.getBallDirectionAngle() - headYawPosition.getValue();
+  }
+
   public double getGoalDistance(){
     if (camera.getGoalElevationAngle() == NaoCam.UNKNOWN)
       return NaoCam.UNKNOWN;
