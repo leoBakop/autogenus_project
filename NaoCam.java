@@ -172,7 +172,7 @@ public class NaoCam {
     
 
     //oponent detection
-    if(isRed)findColorBlob(40, 178, 220, 40); //blue
+    if(isRed)findColorBlob(40, 178, 220, 50); //blue
     else findColorBlob(0,0,0, 20); //black
 
     if(blobDirectionAngle!=UNKNOWN ){
@@ -190,7 +190,7 @@ public class NaoCam {
       if(isRed) findColorBlob(0,0,0, 5); //black
       else findColorBlob(51, 57, 240, 30);  
     }else{
-      if(isRed) findColorBlob(0,0,0, 40); //black also 60
+      if(isRed) findColorBlob(0,0,0, 30); //black also 60
       else findColorBlob(51, 57, 240, 30);  
     }
     

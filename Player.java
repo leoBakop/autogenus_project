@@ -8,6 +8,8 @@
 //                February 25, 2008: Adapted to NaoV3R.proto (Camera select)
 //-----------------------------------------------------------------------------
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 
 import com.cyberbotics.webots.controller.*;
@@ -25,6 +27,7 @@ public abstract class Player extends Robot {
   protected int playerID;
   private Motion standUpFromFrontMotion;
 
+  private int inMessage;
   // devices
   protected Motor headYaw, headPitch;
   protected PositionSensor headYawPosition, headPitchPosition;
@@ -426,11 +429,16 @@ public abstract class Player extends Robot {
   }
 
   protected void readIncomingMessages() {
+   
     while (receiver.getQueueLength() > 0) {
+      
       byte[] data = receiver.getData();
       if (RoboCupGameControlData.hasValidHeader(data)) {
+        
         gameControlData.update(data);
         //System.out.println(gameControlData);
+        updateGameControl();
+        inMessage = ByteBuffer.wrap(data).getInt();
         updateGameControl();
       }
       // else
@@ -465,7 +473,22 @@ public abstract class Player extends Robot {
       System.out.println(e);
     }
   }
+  //----------------------------------------------------------------
+  //leo's communication
   
+
+  public int getIncomingMessage(){
+    return inMessage;
+}
+
+  //request can be attatck, defense, pass
+  public void sendPlanMesagges(int request){
+    emitter.send(ByteBuffer.allocate(4).putInt(request).array());
+  }
+
+//---------------------------------------------------
+
+
   // overidden method of the Robot baseclass
   // we need to read incoming messages at every step
   public int step(int ms) {

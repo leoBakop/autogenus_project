@@ -113,140 +113,15 @@ public class FieldPlayer extends Player {
   }
 
   @Override public void run() {
-
     
-    step(SIMULATION_STEP);
-
-    while (true) {
+    if(playerID == 1){
+      attackPlayerOne();
       
-      runStep();
-
-      getUpIfNecessary();
-
-      
-      int i = 1;
-
-      while (getBallDirection() == NaoCam.UNKNOWN) {
-        if(i%3==0){//if you have already searched for the ball three times, take a step back.
-          playMotion(backwardsMotion);
-          playMotion(backwardsMotion);
-          System.out.println(i);
-          i++;
-        }
-        if(shortDist){
-          playMotion(backwardsMotion);
-          playMotion(backwardsMotion);
-          shortDist=false;
-        }else{
-          System.out.println("searching the ball"); 
-          getUpIfNecessary();
-          if (getBallDirection() != NaoCam.UNKNOWN) break;
-          System.out.println("performing head scan");
-          headScan();
-          if (getBallDirection() != NaoCam.UNKNOWN) break;
-          playMotion(backwardsMotion);
-          if (getBallDirection() != NaoCam.UNKNOWN) break;
-          headScan();
-          if (getBallDirection() != NaoCam.UNKNOWN) break;
-          turnLeft180();
-        }
-        
-      }
-
-      double ballDir = getBallDirection();
-      double ballDist = getBallDistance();
-      
-      
-
-
-      System.out.println("ball dist: " + ballDist + " ball dir: " + ballDir + " goal dir: " + goalDir);
-      
-
-      if (ballDist < 0.3) {
-        
-        
-        camera.searchForGoal();
-        double goalDist =getGoalDistance();
-
-        LinkedList <Boolean> teammatePosition = new LinkedList<Boolean>(); //left = true and right is false
-        LinkedList <Boolean> opponentPosition = new LinkedList<Boolean>(); //left = true and right is false
-        LinkedList<Double> teammateDir;
-        LinkedList <Double> opponentsDir;
-        LinkedList<Double> teammateDist;
-        LinkedList<Double> opponentDist;
-        super.searchForPlayers();
-
-        teammateDist=getTeammateDistance();
-        teammateDir =getTeammateDirection();  //we know that the first Size%Position is right righ
-        opponentDist=getOpponentDistance();  // the second size%position in right left etc
-        opponentsDir=getOpponentDirection();
-    
-        //alse distances are getting bigger when sth is further
-        printList(teammateDist);
-        System.out.println("=================================");
-        printList(opponentDist);
-
-        if(teammateDir!=null) {
-
-          //current section testing
-          //find the best tactic for the current state(pass or shoot)
-          double bestTeammatePos=bestTactic(teammateDir, opponentsDir,
-                                              teammateDist,opponentDist, goalDist);
-          
-          System.out.println("best tactic return "+ bestTeammatePos);
-          if(bestTeammatePos==-2.0){
-            System.out.println("walking with the ball");
-            playMotion(forwardsMotion); //walk with the ball
-            playMotion(forwardsMotion); //walk with the ball
-          }else{
-            System.out.println("best teamate in on the "+bestTeammatePos);
-            int integerBestPos=(int)Math.floor(bestTeammatePos);
-            if(integerBestPos==0) integerBestPos=1;
-            //testing passing session
-            //passing(bestTeammatePos, bestTeammateDir, ballDist, goalDist);
-            passing(integerBestPos);
-            //end of current section testing
-            
-          }
-          
-
-        }else { 
-          goingBehindTheBall();
-          shoot();
-          /* System.out.println("no teammate was found");
-          System.out.println("short distance");
-          shortDist=true;
-          if (ballDir < -0.15){    
-            playMotion(sideStepLeftMotion);
-            System.out.println("lagou step left");
-          }
-          else if (goalDir < -0.35)
-            turnLeft40();
-          else if (goalDir > 0.35)
-            turnRight40();
-          else {
-            shoot();
-          } */
-        }
-      }else {
-          shortDist=false;//new code
-          
-          double goDir = normalizeAngle(ballDir - goalDir);
-
-          if (goDir < ballDir - 0.5)
-            goDir = ballDir - 0.5;
-          else if (goDir > ballDir + 0.5)
-            goDir = ballDir + 0.5;
-
-          goDir = normalizeAngle(goDir);
-
-          turnBodyRel(goDir);
-          if (ballDist < 0.6)
-            playMotion(forwardsMotion);
-          else
-            playMotion(forwards50Motion);
-        }
+    }else{
+      attackPlayerTwo();
     }
+    
+    
   }
 
   //=========================================================================================
@@ -329,6 +204,8 @@ public class FieldPlayer extends Player {
 
     return;
   }
+ 
+ 
   //returns -2 in case of errr
   //-1 in vase of straight shoot
   //0 in case of right right pass
@@ -457,4 +334,165 @@ public class FieldPlayer extends Player {
   }
 
  
+  public void attackPlayerOne(){
+    
+    step(SIMULATION_STEP);
+
+    while (true) {
+      
+      runStep();
+
+      getUpIfNecessary();
+
+      
+      int i = 1;
+
+      while (getBallDirection() == NaoCam.UNKNOWN) {
+        
+        if(i%3==0){//if you have already searched for the ball three times, take a step back.
+          playMotion(backwardsMotion);
+          playMotion(backwardsMotion);
+          System.out.println(i);
+          i++;
+        }
+        if(shortDist){
+          playMotion(backwardsMotion);
+          playMotion(backwardsMotion);
+          shortDist=false;
+        }else{
+          System.out.println("searching the ball"); 
+          getUpIfNecessary();
+          if (getBallDirection() != NaoCam.UNKNOWN) break;
+          System.out.println("performing head scan");
+          headScan();
+          if (getBallDirection() != NaoCam.UNKNOWN) break;
+          playMotion(backwardsMotion);
+          if (getBallDirection() != NaoCam.UNKNOWN) break;
+          headScan();
+          if (getBallDirection() != NaoCam.UNKNOWN) break;
+          turnLeft180();
+        }
+        
+      }
+
+      double ballDir = getBallDirection();
+      double ballDist = getBallDistance();
+      sendPlanMesagges(1);
+      
+
+
+      System.out.println("ball dist: " + ballDist + " ball dir: " + ballDir + " goal dir: " + goalDir);
+      
+
+      if (ballDist < 0.3) {
+        
+        
+        camera.searchForGoal();
+        double goalDist =getGoalDistance();
+
+        LinkedList <Boolean> teammatePosition = new LinkedList<Boolean>(); //left = true and right is false
+        LinkedList <Boolean> opponentPosition = new LinkedList<Boolean>(); //left = true and right is false
+        LinkedList<Double> teammateDir;
+        LinkedList <Double> opponentsDir;
+        LinkedList<Double> teammateDist;
+        LinkedList<Double> opponentDist;
+        super.searchForPlayers();
+
+        teammateDist=getTeammateDistance();
+        teammateDir =getTeammateDirection();  //we know that the first Size%Position is right righ
+        opponentDist=getOpponentDistance();  // the second size%position in right left etc
+        opponentsDir=getOpponentDirection();
+    
+        //alse distances are getting bigger when sth is further
+        printList(teammateDist);
+        System.out.println("=================================");
+        printList(opponentDist);
+
+        if(teammateDir!=null) {
+
+          //current section testing
+          //find the best tactic for the current state(pass or shoot)
+          double bestTeammatePos=bestTactic(teammateDir, opponentsDir,
+                                              teammateDist,opponentDist, goalDist);
+          
+          System.out.println("best tactic return "+ bestTeammatePos);
+          if(bestTeammatePos==-2.0){
+            System.out.println("walking with the ball");
+            walkWithTheBall();
+          }else{
+            System.out.println("best teamate in on the "+bestTeammatePos);
+            int integerBestPos=(int)Math.floor(bestTeammatePos);
+            if(integerBestPos==0) integerBestPos=1;
+            //testing passing session
+            //passing(bestTeammatePos, bestTeammateDir, ballDist, goalDist);
+            passing(integerBestPos);
+            //end of current section testing
+            
+          }
+          
+
+        }else { 
+          goingBehindTheBall();
+          shoot();
+          /* System.out.println("no teammate was found");
+          System.out.println("short distance");
+          shortDist=true;
+          if (ballDir < -0.15){    
+            playMotion(sideStepLeftMotion);
+            System.out.println("lagou step left");
+          }
+          else if (goalDir < -0.35)
+            turnLeft40();
+          else if (goalDir > 0.35)
+            turnRight40();
+          else {
+            shoot();
+          } */
+        }
+      }else {
+          shortDist=false;//new code
+          
+          double goDir = normalizeAngle(ballDir - goalDir);
+
+          if (goDir < ballDir - 0.5)
+            goDir = ballDir - 0.5;
+          else if (goDir > ballDir + 0.5)
+            goDir = ballDir + 0.5;
+
+          goDir = normalizeAngle(goDir);
+
+          turnBodyRel(goDir);
+          if (ballDist < 0.6)
+            playMotion(forwardsMotion);
+          else
+            playMotion(forwards50Motion);
+        }
+    }
+  }
+
+  public void attackPlayerTwo(){
+    step(SIMULATION_STEP);
+    
+    while(true){
+      runStep();
+      getUpIfNecessary();
+      int tactic= getIncomingMessage();
+      
+        System.out.println("the given tactic is"+tactic);
+      while(tactic==0){
+        System.out.println("now i am attacking");
+        playMotion(forwardsMotion);
+      }
+    } 
+  }
+
+  public void walkWithTheBall(){
+    for(int i=0; i<2; i++){
+      playMotion(forwardsMotion);
+    }
+    //i have to keep straight the 
+    //bottom camera somehow
+   
+  }
+
 }
