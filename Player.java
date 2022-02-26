@@ -348,10 +348,10 @@ public abstract class Player extends Robot {
   }
 
   public double getGoalDirection(){
-    if (camera.getBallDirectionAngle() == NaoCam.UNKNOWN)
+    if (camera.getGoalDirectionAngle() == NaoCam.UNKNOWN)
       return NaoCam.UNKNOWN;
     else
-      return camera.getBallDirectionAngle() - headYawPosition.getValue();
+      return camera.getGoalDirectionAngle() - headYawPosition.getValue();
   }
 
   public double getGoalDistance(){
@@ -435,13 +435,13 @@ public abstract class Player extends Robot {
       byte[] data = receiver.getData();
       if (RoboCupGameControlData.hasValidHeader(data)) {
         
-        gameControlData.update(data);
+        /* gameControlData.update(data);
         //System.out.println(gameControlData);
-        updateGameControl();
+        updateGameControl(); */
        
         inMessage=data[4];
         
-        updateGameControl();
+        //updateGameControl();
       }
       // else
       //   System.out.println("readIncomingMessages(): received unexpected message of " + data.length + " bytes");
@@ -483,15 +483,18 @@ public abstract class Player extends Robot {
     return inMessage;
 }
 
-  //request can be error==-1 attatck ==0, pass==1, defence==2
-  public void sendPlanMesagges(){
+  //request can be  pass==82, attack anything else
+  public void sendPlanMesagges(byte b){
     byte[] header=createHeader();
+    header[4]=b;
+    for(int i=0; i<5; i++)
+      System.out.println(header[i]);
     emitter.send(header);
     
   }
 
   public byte[] createHeader(){
-    byte[] header={82,71,109,101,00};
+    byte[] header={82,71,109,101,0};
     return header;
   }
 

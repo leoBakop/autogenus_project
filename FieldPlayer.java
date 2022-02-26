@@ -115,6 +115,7 @@ public class FieldPlayer extends Player {
   @Override public void run() {
     
     if(playerID == 1){
+      
       attackPlayerOne();
       
     }else{
@@ -131,7 +132,7 @@ public class FieldPlayer extends Player {
     camera.searchForBall();
     // -0.1< best ball direction for shooting<0.1 
     
-    
+    sendPlanMesagges((byte) 82);
     playMotion(backwardsMotion);
     switch(teammatePos){
       case 0: 
@@ -153,7 +154,7 @@ public class FieldPlayer extends Player {
       default:
       //do nothung if the ball is in front of you
     }
-    
+    sendPlanMesagges((byte) 82);
     System.out.println("behind the ball");
     goingBehindTheBall();
     shoot();
@@ -221,7 +222,7 @@ public class FieldPlayer extends Player {
     
     
 
-    if(goalDist>0.27){ //shoot
+    if(goalDist>0.4 && goalDist<20){ //shoot
       System.out.println("shooting");
       return -1.0;
     }
@@ -245,14 +246,14 @@ public class FieldPlayer extends Player {
     for(int i=super.REGEIONS; i<2*super.REGEIONS; i++){
       if(Math.abs(teammates.get(i)-UNKNOWN_DISTANCE)>0.1 && Math.abs(teammatesDist.get(i))<11) 
         increaseLinkedList(teammateCounter, 1);
-      if(Math.abs(opponents.get(i)-UNKNOWN_DISTANCE)>0.1 && Math.abs(opponentsDist.get(i))<11) 
+      if(Math.abs(opponents.get(i)-UNKNOWN_DISTANCE)>0.1 && Math.abs(opponentsDist.get(i))<9) 
         increaseLinkedList(opponentCounter, 1);
     }
 
     for(int i=2*super.REGEIONS; i<3*super.REGEIONS; i++){
       if(Math.abs(teammates.get(i)-UNKNOWN_DISTANCE)>0.1&& Math.abs(teammatesDist.get(i))<11)
         increaseLinkedList(teammateCounter, 2);
-      if(Math.abs(opponents.get(i)-UNKNOWN_DISTANCE)>0.1&& Math.abs(opponentsDist.get(i))<11)
+      if(Math.abs(opponents.get(i)-UNKNOWN_DISTANCE)>0.1&& Math.abs(opponentsDist.get(i))<9)
         increaseLinkedList(opponentCounter, 2);
     }
 
@@ -271,19 +272,22 @@ public class FieldPlayer extends Player {
     }
 
     int max=-1;
-    int maxIndex=-1;
+    int maxIndex=-2;
     int middleIndex=0;
     int tmp=0;
+
     System.out.println("teammate counter");
     printList(teammateCounter);
     System.out.println("opponent counter");
     printList(opponentCounter);
+
     for(int i=0; i<4; i++){
-      tmp=Math.max(max, teammateCounter.get(i) - opponentCounter.get(i));
+      tmp=teammateCounter.get(i) - opponentCounter.get(i);
       if(tmp>max){
-        System.out.println("maximum is "+ maxIndex);
         maxIndex=i;
         max=tmp;
+        System.out.println("maximum is "+ maxIndex);
+        
         if(tmp-max < 4) //teammate is somewhere in the middle
           middleIndex=i-1;
       }
@@ -298,6 +302,7 @@ public class FieldPlayer extends Player {
   }
 
   public void shoot(){
+    
     System.out.println("tracking ball");
     super.trackBall();
     System.out.println("end of tracking");
@@ -420,17 +425,16 @@ public class FieldPlayer extends Player {
           if(bestTeammatePos==-2.0){
             System.out.println("walking with the ball");
             sameDirWithGoal();
+            goingBehindTheBall();
             walkWithTheBall();
             //sendPlanMesagges();
           }else{
             System.out.println("best teamate in on the "+bestTeammatePos);
             int integerBestPos=(int)Math.floor(bestTeammatePos);
             if(integerBestPos==0) integerBestPos=1;
-            //testing passing session
-            //passing(bestTeammatePos, bestTeammateDir, ballDist, goalDist);
+            sendPlanMesagges((byte) 82);
             passing(integerBestPos);
-            //end of current section testing
-            
+            //sendPlanMesagges((byte )81);
           }
           
 
@@ -481,15 +485,27 @@ public class FieldPlayer extends Player {
       getUpIfNecessary();
       byte tactic= getIncomingMessage();
       
-      while(tactic==0){
+      while(tactic!=82 && tactic!=81){
+        System.out.println(tactic);
         playMotion(forwards50Motion);
         tactic=getIncomingMessage();
       }
 
-      while(tactic==1){
-        System.out.println("stay");
+      while(tactic==82){
+        try {
+          wait(1000);
+        } catch (InterruptedException e) {
+          System.out.println(e);
+        }
+        
         tactic=getIncomingMessage();
       }
+
+      while(tactic==81){
+        System.out.println("defence");
+        playMotion(backwardsMotion);
+      }
+      
     } 
   }
 
@@ -510,25 +526,38 @@ public class FieldPlayer extends Player {
   }
 
   public void sameDirWithGoal(){
+    //------------------------------------------------------------------
+    //in order to initiallize the camera
+    int steps = 30;
+    final double HEAD_YAW_MAX = 2.0;
+    double yawAngle;
+
+    headPitch.setPosition(0.0);  // horizontal head
+    camera.selectTop();  // use top camera
+
+    for (int i = 0; i < steps/2; i++) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+      headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
+      step(SIMULATION_STEP);
+    }
+    //---------------------------------------------------------------------------
+   
     System.out.println("inside same dir");
     camera.searchForGoal();
     double goalDir=getGoalDirection();
-    while(Math.abs(goalDir)>0.2){
-      System.out.println(goalDir);
-      if(goalDir==camera.UNKNOWN){
-        for(int i=0; i<2; i++){
-          turnLeft40();
-        }
-      }
+    System.out.println(goalDir);
+    while(Math.abs(goalDir)>=0.3){  
+
       if(goalDir<-0.6) turnLeft60();
-      if(goalDir<-0.35) turnLeft40();
-      if(goalDir >0.6) turnRight60();
-      if(goalDir>0.35)  turnRight40();
+      else if(goalDir<-0.31) turnLeft40();
+      else if(goalDir >0.6) turnRight60();
+      else if(goalDir>0.31)  turnRight40();
       
       camera.searchForGoal();
       goalDir=getGoalDirection();
+      System.out.println("goal direction found "+goalDir);
     }
-
+    System.out.println("return same dir with goal");
     return;
   }
 }
