@@ -202,8 +202,6 @@ public class NaoCam {
       tElevationAngle.addLast(0.0);
     }
     
-    
-    
     return retVal;
     
   }

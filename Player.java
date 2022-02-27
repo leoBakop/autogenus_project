@@ -263,13 +263,8 @@ public abstract class Player extends Robot {
       }
     }
 
-    
-
-    
+        
     headYaw.setPosition(0.0);
-
-    
-
 
   }
 
