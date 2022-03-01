@@ -266,4 +266,28 @@ public class NaoCam {
     else
       return OFFSET_ANGLE;
   }
+
+  public boolean opponentNearBall(){
+    
+    image = topCamera.getImage();
+
+    double dirDiff=1;
+    double elevDiff=0.2;
+
+    findColorBlob(240, 140, 50, 60); //search for ball
+    double ballDir = blobDirectionAngle;
+    double ballElev = blobElevationAngle;
+
+    //searching for opponent
+    if(isRed)findColorBlob(40, 178, 220, 50); //blue
+    else findColorBlob(0,0,0, 20); //black
+
+    double oppDir=blobDirectionAngle;
+    double oppElev=blobElevationAngle;
+    if(ballDir ==UNKNOWN || oppDir==UNKNOWN) return false; // no ball or opponent was fount
+    System.out.println("direction differnece is "+Math.abs(ballDir-oppDir));
+    System.out.println("elevation differnece is "+Math.abs(ballElev-oppElev));
+    return (Math.abs(ballDir-oppDir) < dirDiff &&
+            Math.abs(ballElev-oppElev) < elevDiff );
+  }
 }

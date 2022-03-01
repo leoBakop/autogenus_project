@@ -44,6 +44,8 @@ public abstract class Player extends Robot {
   
   double minHeadYawPosition, maxHeadYawPosition, minHeadPitchPosition, maxHeadPitchPosition;
 
+  protected boolean hasTheBall;
+
   public double clamp(double value, double min, double max) {
     if (min > max) {
       assert false;
@@ -268,6 +270,41 @@ public abstract class Player extends Robot {
 
   }
 
+  protected boolean opponentsNearBall(){
+    //perfrom a head scan but instead of looking for the ball
+    // call the camera.opponentNearBall
+    int steps = 30;
+    final double HEAD_YAW_MAX = 2.0;
+    double yawAngle;
+
+    headPitch.setPosition(0.0);  // horizontal head
+    camera.selectTop();  // use top camera
+
+    // left to right using TOP camera
+    for (int i = 0; i < steps; i++) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+      headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
+      step(SIMULATION_STEP);
+      if (camera.opponentNearBall()) return true;
+    }
+
+    // ball was not found: restore head straight position
+    headYaw.setPosition(0.0);
+    return false;
+  }
+
+  public void cameraInitialization(){
+    int steps = 30;
+    final double HEAD_YAW_MAX = 2.0;
+    double yawAngle;
+
+    for (int i = steps - 1; i >= steps/2; i--) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+      headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
+      step(SIMULATION_STEP); 
+    }
+  }
+
   public double getBallDirection() {
     if (camera.getBallDirectionAngle() == NaoCam.UNKNOWN)
       return NaoCam.UNKNOWN;
@@ -433,9 +470,11 @@ public abstract class Player extends Robot {
         /* gameControlData.update(data);
         //System.out.println(gameControlData);
         updateGameControl(); */
-       
-        inMessage=data[4];
-        
+        if(data[4]!=6){
+          inMessage=data[4];
+          System.out.println(inMessage);
+          if(inMessage==84)  hasTheBall=true;
+        }
         //updateGameControl();
       }
       // else
@@ -478,7 +517,7 @@ public abstract class Player extends Robot {
     return inMessage;
 }
 
-  //request can be  pass==82, attack anything else
+  //request can be  pass==82, defence==81 attack==83 , playMakerChanged==84
   public void sendPlanMesagges(byte b){
     byte[] header=createHeader();
     header[4]=b;
@@ -525,4 +564,9 @@ public abstract class Player extends Robot {
   }
 
   public abstract void run();
+
+  protected void sleepStepsNoReading(int steps){
+    for (int i = 0; i < steps; i++)
+      super.step(SIMULATION_STEP);
+  }
 }

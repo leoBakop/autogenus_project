@@ -20,7 +20,7 @@ public class FieldPlayer extends Player {
   private Motion shooting;
   private double goalDir = 0.0; // interpolated goal direction (with respect to front direction of robot body)
   private boolean shortDist; //new
-
+  
 
   private final double UNKNOWN_DISTANCE=-239004;
 
@@ -38,6 +38,7 @@ public class FieldPlayer extends Player {
     sideStepLeftMotion  = new Motion("../../motions/SideStepLeft.motion");
     shooting= new Motion ("../../motions/Shoot.motion");  // new code
     shortDist=false;
+    hasTheBall= playerID==1;
 
     // move arms along the body
     Motor leftShoulderPitch = getMotor("LShoulderPitch");
@@ -114,23 +115,23 @@ public class FieldPlayer extends Player {
 
   @Override public void run() {
     
-    if(playerID == 1){
-      attackPlayerOne(); 
-    }else{
-      //attackPlayerTwo();
-    }
-    
-    
+
+    while(true){
+      while(hasTheBall){
+        attackPlayerOne(); 
+      }
+      while(!hasTheBall){
+        attackPlayerTwo();
+      }
+    }  
   }
 
   //=========================================================================================
 
   
   public void passing(int teammatePos){
-    camera.searchForBall();
-    // -0.1< best ball direction for shooting<0.1 
     
-    sendPlanMesagges((byte) 82);
+    camera.searchForBall();
     playMotion(backwardsMotion);
     switch(teammatePos){
       case 0: 
@@ -164,7 +165,7 @@ public class FieldPlayer extends Player {
     double oldBallDist =getBallDistance();
     double a=0.5;
 
-    while(Math.abs(oldBallDir)>0.12 ){
+    while(Math.abs(oldBallDir)>0.2 ){
       if(a<0.0) a=0.0;
       if(a>1.0) a=1.0;
 
@@ -177,13 +178,13 @@ public class FieldPlayer extends Player {
       if(newBallDir==camera.UNKNOWN) break; //might means that the ball is on shadow
       if(Math.abs(newBallDir)<=0.1) break;
       if(oldBallDir> 0.0 && newBallDir > oldBallDir){ //it means that the robot is righter than the ideal
-        a+=0.1;
+        a+=0.2;
       }else if(oldBallDir< 0.0 && newBallDir < oldBallDir){ ////it means that the robot is lefter than the ideal
-        a-=0.1;
+        a-=0.2;
       }else if(oldBallDir< 0.0 && newBallDir >oldBallDir){ //it means that the robot must go right
-        a-=0.1;
+        a-=0.2;
       }else if(oldBallDir> 0.0 && newBallDir <oldBallDir){ //it means that the robot must go left
-        a+=0.1;
+        a+=0.2;
       }else { //do sth random
         playMotion(sideStepLeftMotion);
       }
@@ -194,13 +195,15 @@ public class FieldPlayer extends Player {
 
 
     if (getBallDirection()!=camera.UNKNOWN){
-      while(getBallDistance()>0.17){
+      while(getBallDistance()>0.2){
         playMotion(forwardsMotion);
         camera.searchForBall();
       }
     }else{
-      playMotion(sideStepLeftMotion);
-      playMotion(forwardsMotion);
+      if(shoot){
+        playMotion(sideStepLeftMotion);
+        playMotion(forwardsMotion);
+      }
     }
     
 
@@ -389,10 +392,10 @@ public class FieldPlayer extends Player {
 
 
       System.out.println("ball dist: " + ballDist + " ball dir: " + ballDir + " goal dir: " + goalDir);
-      
+     
 
       if (ballDist < 0.3) {
-        
+        sendPlanMesagges((byte) 82);
         sameDirWithGoal();
         camera.searchForGoal();
         double goalDist =getGoalDistance();
@@ -405,7 +408,6 @@ public class FieldPlayer extends Player {
         LinkedList<Double> teammateDist;
         LinkedList<Double> opponentDist;
         //right before i search for teammates, everyone should stop walking
-        sendPlanMesagges((byte) 82);
         super.searchForPlayers();
 
         teammateDist=getTeammateDistance();
@@ -430,19 +432,34 @@ public class FieldPlayer extends Player {
             System.out.println("walking with the ball");
             sameDirWithGoal();
             goingBehindTheBall(false);
+            sendPlanMesagges((byte) 83);
             walkWithTheBall();
+            //testing code
+            //the best part for that code is after shooting 
+            //or upper with a chance //it has been placed correctly
+            if(opponentsNearBall()){ //playing defence
+              System.out.println("playing defence");
+              System.exit(0);
+            }else cameraInitialization();
+            //end of testing code
+
           }else if(bestTeammatePos!=-1){
             System.out.println("best teamate in on the "+bestTeammatePos);
             int integerBestPos=(int)Math.floor(bestTeammatePos);
             if(integerBestPos==0) integerBestPos=1;
-            sendPlanMesagges((byte) 82);
+            
             passing(integerBestPos);
+            sendPlanMesagges((byte) 84);
+            hasTheBall=false;
+            sameDirWithGoal(); //in order to walk straight
+            return;
           }
           
 
         }else { 
           goingBehindTheBall(true);
           shoot();
+          sendPlanMesagges((byte) 81);
         }
       }else {
           shortDist=false;//new code
@@ -474,26 +491,33 @@ public class FieldPlayer extends Player {
       byte tactic= getIncomingMessage();
       
       while(tactic!=82 && tactic!=81){
-        System.out.println(tactic);
         playMotion(forwards50Motion);
         tactic=getIncomingMessage();
       }
 
       while(tactic==82){
-        try {
-          System.out.println("inside 82 tactic");
-          wait(1000);
-        } catch (InterruptedException e) {
-          System.out.println(e);
-        }
         
+        System.out.println("inside 82 tactic waiting");
+        sleepSteps(10); 
         tactic=getIncomingMessage();
       }
 
       while(tactic==81){
         System.out.println("defence");
         playMotion(backwardsMotion);
+        tactic=getIncomingMessage();
       }
+      while(tactic==83){
+        System.out.println("attack");
+        playMotion(forwardsMotion);
+        tactic=getIncomingMessage();
+      }
+      if(tactic==84){
+        hasTheBall=true;
+        System.out.println("attack player two terminated");
+        return;
+      }
+
       
     } 
   }
