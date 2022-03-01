@@ -353,7 +353,7 @@ public abstract class Player extends Robot {
     if (camera.getGoalElevationAngle() == NaoCam.UNKNOWN)
       return NaoCam.UNKNOWN;
 
-    double goalEle = camera.getBallElevationAngle() - headPitchPosition.getValue() - camera.getOffsetAngle();
+    double goalEle = camera.getGoalElevationAngle() - headPitchPosition.getValue() - camera.getOffsetAngle();
     
     return (0.51 - 0.043) / Math.tan(-goalEle);
 

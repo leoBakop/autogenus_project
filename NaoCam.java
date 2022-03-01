@@ -185,7 +185,7 @@ public class NaoCam {
       if(isRed) findColorBlob(0,0,0, 5); //black
       else findColorBlob(51, 57, 240, 30);  
     }else{
-      if(isRed) findColorBlob(0,0,0, 50); //black also 60
+      if(isRed) findColorBlob(0,0,0, 20); //black
       else findColorBlob(51, 57, 240, 50);  
     }
     
