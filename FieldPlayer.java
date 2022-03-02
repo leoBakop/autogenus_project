@@ -194,6 +194,7 @@ public class FieldPlayer extends Player {
     }
 
 
+    
     if (getBallDirection()!=camera.UNKNOWN){
       while(getBallDistance()>0.2){
         playMotion(forwardsMotion);
