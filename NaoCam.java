@@ -285,8 +285,7 @@ public class NaoCam {
     double oppDir=blobDirectionAngle;
     double oppElev=blobElevationAngle;
     if(ballDir ==UNKNOWN || oppDir==UNKNOWN) return false; // no ball or opponent was fount
-    System.out.println("direction differnece is "+Math.abs(ballDir-oppDir));
-    System.out.println("elevation differnece is "+Math.abs(ballElev-oppElev));
+ 
     return (Math.abs(ballDir-oppDir) < dirDiff &&
             Math.abs(ballElev-oppElev) < elevDiff );
   }

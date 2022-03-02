@@ -45,6 +45,7 @@ public abstract class Player extends Robot {
   double minHeadYawPosition, maxHeadYawPosition, minHeadPitchPosition, maxHeadPitchPosition;
 
   protected boolean hasTheBall;
+  protected boolean onDefence;
 
   public double clamp(double value, double min, double max) {
     if (min > max) {

@@ -39,6 +39,7 @@ public class FieldPlayer extends Player {
     shooting= new Motion ("../../motions/Shoot.motion");  // new code
     shortDist=false;
     hasTheBall= playerID==1;
+    onDefence=true;
 
     // move arms along the body
     Motor leftShoulderPitch = getMotor("LShoulderPitch");
@@ -439,6 +440,8 @@ public class FieldPlayer extends Player {
             if(opponentsNearBall()){ //playing defence
               System.out.println("playing defence");
               sendPlanMesagges((byte) 81);
+              onDefence=true;
+              defencePlayerOne();
             }else cameraInitialization();
             //end of testing code
 
@@ -458,7 +461,13 @@ public class FieldPlayer extends Player {
         }else { 
           goingBehindTheBall(true);
           shoot();
-          sendPlanMesagges((byte) 81);
+          if(opponentsNearBall()){ //playing defence
+            System.out.println("playing defence");
+            sendPlanMesagges((byte) 81);
+            onDefence=true;
+            defencePlayerOne();
+          }else cameraInitialization();
+          
         }
       }else {
           shortDist=false;//new code
@@ -571,18 +580,41 @@ public class FieldPlayer extends Player {
     return;
   }
 
+  public boolean nearBall(){
+    double maxDist=1.2;
+    headScan();
+    double ballDist=getBallDistance();
+    return ballDist<maxDist;
+  }
+
   public void defence(){
 
     sameDirWithGoal(); //for first time and then just go backwards until a certain spot
     double goalDist=getGoalDistance();
-    while(goalDist>-13){
+    while(goalDist>=-8){ 
       playMotion(backwardsMotion);
       camera.searchForGoal();
       goalDist=getGoalDistance();
-      System.out.println("inside defence goal dist is "+ goalDist);
       if(getIncomingMessage()==83) return;
     }
     
   }
 
+  public void defencePlayerOne(){
+
+    double goalDist=0.0;
+    while(onDefence){
+      if((! opponentsNearBall()) || nearBall()){  //if my oponents are not near the ball or i amm near the ball then attack
+        onDefence=true;
+        sendPlanMesagges((byte) 83); //inform the teamtes that is time for attack
+        return ;
+      }
+      camera.searchForGoal();
+      goalDist=getGoalDistance();
+      if(goalDist>-2.4){ 
+        playMotion(backwardsMotion); 
+        System.out.println("goal dist inside defence player one"+goalDist);
+      }else goingBehindTheBall(false);
+    }
+  }
 }
