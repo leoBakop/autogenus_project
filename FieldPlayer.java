@@ -173,8 +173,7 @@ public class FieldPlayer extends Player {
       else playMotion(sideStepLeftMotion);
       camera.searchForBall();
       double newBallDir = getBallDirection();
-      System.out.println("a is "+a);
-      System.out.println("new bal direction is "+ newBallDir);
+      
       if(newBallDir==camera.UNKNOWN) break; //might means that the ball is on shadow
       if(Math.abs(newBallDir)<=0.1) break;
       if(oldBallDir> 0.0 && newBallDir > oldBallDir){ //it means that the robot is righter than the ideal
@@ -439,7 +438,7 @@ public class FieldPlayer extends Player {
             //or upper with a chance //it has been placed correctly
             if(opponentsNearBall()){ //playing defence
               System.out.println("playing defence");
-              System.exit(0);
+              sendPlanMesagges((byte) 81);
             }else cameraInitialization();
             //end of testing code
 
@@ -497,18 +496,15 @@ public class FieldPlayer extends Player {
 
       while(tactic==82){
         
-        System.out.println("inside 82 tactic waiting");
         sleepSteps(10); 
         tactic=getIncomingMessage();
       }
 
       while(tactic==81){
-        System.out.println("defence");
-        playMotion(backwardsMotion);
-        tactic=getIncomingMessage();
+        defence();
+        tactic=getIncomingMessage(); 
       }
       while(tactic==83){
-        System.out.println("attack");
         playMotion(forwardsMotion);
         tactic=getIncomingMessage();
       }
@@ -554,7 +550,7 @@ public class FieldPlayer extends Player {
       step(SIMULATION_STEP);
     }
     //---------------------------------------------------------------------------
-   
+    playMotion(backwardsMotion); //now added
     System.out.println("inside same dir");
     camera.searchForGoal();
     double goalDir=getGoalDirection();
@@ -571,6 +567,22 @@ public class FieldPlayer extends Player {
       System.out.println("goal direction found "+goalDir);
     }
     System.out.println("return same dir with goal");
+    playMotion(forwardsMotion);
     return;
   }
+
+  public void defence(){
+
+    sameDirWithGoal(); //for first time and then just go backwards until a certain spot
+    double goalDist=getGoalDistance();
+    while(goalDist>-13){
+      playMotion(backwardsMotion);
+      camera.searchForGoal();
+      goalDist=getGoalDistance();
+      System.out.println("inside defence goal dist is "+ goalDist);
+      if(getIncomingMessage()==83) return;
+    }
+    
+  }
+
 }
