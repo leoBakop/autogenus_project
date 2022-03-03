@@ -271,6 +271,25 @@ public abstract class Player extends Robot {
 
   }
 
+  protected void searchBall(){
+    int steps = 30;
+    final double HEAD_YAW_MAX = 2.0;
+    double yawAngle;
+
+    camera.selectBottom();  // use bottom camera
+
+    // right to left using BOTTOM camera
+    for (int i = steps - 1; i >= 0; i--) {
+      yawAngle = ((double)i / (steps - 1) * 2.0 - 1.0) * HEAD_YAW_MAX;
+      headYaw.setPosition(clamp(yawAngle, minHeadYawPosition, maxHeadYawPosition));
+      step(SIMULATION_STEP);
+      camera.searchForBall();
+      if (camera.getBallDirectionAngle() != NaoCam.UNKNOWN)
+        return;
+    }
+  }
+
+
   protected boolean opponentsNearBall(){
     //perfrom a head scan but instead of looking for the ball
     // call the camera.opponentNearBall
